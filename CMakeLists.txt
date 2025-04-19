@@ -12,5 +12,4 @@ idf_component_register(
                 ${main_comp_dir} 
             REQUIRES
                 nvs_flash
-                esp_log
            )
