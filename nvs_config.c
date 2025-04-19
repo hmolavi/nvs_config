@@ -20,7 +20,12 @@
 
 #include "esp_err.h"
 #include "esp_log.h"
+#if defined(ESP_IDF_VERSION_MAJOR) && (ESP_IDF_VERSION_MAJOR >= 5)
+#include "esp_timer/esp_timer.h"
+#else
 #include "esp_timer.h"
+#endif
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 #include "nvs.h"
@@ -341,10 +346,30 @@ esp_err_t NvsConfig_Init(void)
         nvs_close(handle);
     }
 
-    // Periodic save timer
+    #if defined(ESP_IDF_VERSION_MAJOR) && (ESP_IDF_VERSION_MAJOR >= 5)
+    // Using esp_timer in ESP-IDF v5 and later
+    const esp_timer_create_args_t periodic_timer_args = {
+        .callback = &save_dirty_parameters_callback,
+        .arg = NULL,
+        .dispatch_method = ESP_TIMER_TASK,
+        .name = "g_param_save"
+    };
+    esp_timer_handle_t periodic_timer;
+    esp_err_t err = esp_timer_create(&periodic_timer_args, &periodic_timer);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to create periodic timer");
+        return ESP_FAIL;
+    }
+    err = esp_timer_start_periodic(periodic_timer, 30000 * 1000); // period in microseconds (30 seconds)
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to start periodic timer");
+        return err;
+    }
+    #else
+    // Using FreeRTOS timers for earlier ESP-IDF versions
     TimerHandle_t xTimer = xTimerCreate(
         "g_param_save",
-        pdMS_TO_TICKS(30000),  // Timer period in ticks (30 seconds) // 30000
+        pdMS_TO_TICKS(30000),  // Timer period in ticks (30 seconds)
         pdTRUE,
         (void*)0,
         save_dirty_parameters_callback);
@@ -356,5 +381,7 @@ esp_err_t NvsConfig_Init(void)
         ESP_LOGE(TAG, "Failed to create periodic timer");
         return ESP_FAIL;
     }
+    #endif // defined(ESP_IDF_VERSION_MAJOR) && (ESP_IDF_VERSION_MAJOR >= 5)
+    
     return ESP_OK;
 }
