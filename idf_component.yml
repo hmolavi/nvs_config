@@ -4,4 +4,3 @@ url: https://github.com/hmolavi/nvs_config.git
 dependencies:
   idf: ">=4.4"
   nvs_flash: "*" 
-  esp_log: "*"
