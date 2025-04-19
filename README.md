@@ -31,7 +31,7 @@ The **NVS Storage Config Library** is an ESP-IDF component designed to simplify 
    ```
 
 2. **Define Your NVS Parameters:**  
-   Create an `param_table.inc` file in your project's `main` directory. Use either the provided example inc file or one here:
+   Create an `param_table.inc` file in your project's `main` directory. Use either the provided example file, [param_table_example.inc](param_table_example.inc), or one here:
 
    ```c
    /* param_table.inc */
