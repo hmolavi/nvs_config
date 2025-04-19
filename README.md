@@ -58,11 +58,17 @@ The **NVS Storage Config Library** is an ESP-IDF component designed to simplify 
    #undef ARRAY
    #undef SECURE_LEVEL
    ```
+3. **Include Header:**  
+   Add the following include statement to your source file:
 
-3. **Initialize in User Code:**  
+   ```c
+   #include "nvs_config.h"
+   ```
+
+4. **Initialize in User Code:**  
    Call `NvsConfig_Init()` at startup to load and manage parameters.
 
-4. **Accessing Your Parameters:**
+5. **Accessing Your Parameters:**  
    To interact with your parameters, simply prefix the action (Get, Set, Reset, Print) with `Param_` followed by the name of the parameter as defined in your "param_table.inc" file. This naming convention automatically provides you with the corresponding function for that parameter.
 
    ```c
@@ -71,11 +77,11 @@ The **NVS Storage Config Library** is an ESP-IDF component designed to simplify 
    int buffer_write;
    esp_err_t rc;
 
-   // Get
+   // Get (default is A)
    letter = Param_GetLetter();
    
    // Set
-   rc = Param_SetLetter('A');
+   rc = Param_SetLetter('Z');
    
    // Reset (back to A)
    rc = Param_ResetLetter();
@@ -85,25 +91,11 @@ The **NVS Storage Config Library** is an ESP-IDF component designed to simplify 
    printf("Our letter is: %s", buf);
    ```
 
-## Example
+## Examples
 
-```c
-#include "nvs_config.h"
-
-void app_main(void) {
-    // Initialize the NVS configuration system.
-    if (NvsConfig_Init() != ESP_OK) {
-        printf("NvsConfig Failed\n");
-    }
-
-    // Set or get specific parameters using generated functions.
-    Param_SetLetter('A');  // Change example char parameter
-    char value = Param_GetLetter();
-
-    // Change security level if needed.
-    NvsConfig_SecureLevelChange(0);
-}
-```
+For a complete demonstration, please refer to the examples provided in the examples folder of this repository.  
+- [basic_usage](/examples/basic_usage/)
+- [array_example](/examples/array_example/)
 
 ## Build & Integration
 
