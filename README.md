@@ -97,12 +97,9 @@ For a complete demonstration, please refer to the examples provided in the examp
 - [basic_usage](/examples/basic_usage/)
 - [array_example](/examples/array_example/)
 
-## Build & Integration
+## Compatibility
 
-- **idf_component.yml**  
-  Ensure the component’s version and dependencies are correctly specified.
-- **CMakeLists.txt**  
-  The component is registered with ESP-IDF using `idf_component_register`.
+This library is fully compatible with both major releases of ESP-IDF v4 and ESP-IDF v5.
 
 ## License
 
