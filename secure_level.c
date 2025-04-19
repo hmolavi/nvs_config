@@ -39,6 +39,11 @@ uint8_t NvsConfig_SecureLevel(void) { return CurrentSecureLevel; }
 
 esp_err_t NvsConfig_SecureLevelChange(uint8_t new_secure_level)
 {
+    size_t num_levels = sizeof(level_meanings) / sizeof(level_meanings[0]);
+    if (new_secure_level >= num_levels) {
+        ESP_LOGE(TAG, "Invalid secure level %u; valid range is 0 to %zu", new_secure_level, num_levels - 1);
+        return ESP_ERR_INVALID_ARG;
+    }
     ESP_LOGW(TAG, "Secure Level Changing (%u %s) -> (%u %s)",
              CurrentSecureLevel, level_meanings[CurrentSecureLevel],
              new_secure_level, level_meanings[new_secure_level]);
