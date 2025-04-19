@@ -135,12 +135,14 @@ extern NvsConfigMasterController_t g_nvsconfig_controller;
 #define PARAM(secure_lvl_, type_, name_, default_value_, description_) \
     esp_err_t Param_Set##name_(const type_ value);                     \
     type_ Param_Get##name_(void);                                      \
-    esp_err_t Param_Reset##name_(void);
+    esp_err_t Param_Reset##name_(void);                                \
+    int Param_Print##name_(char* buf, size_t buf_size);
 #define ARRAY(secure_lvl_, type_, size_, name_, default_value_, description_) \
     esp_err_t Param_Set##name_(const type_* value, size_t length);            \
     const type_* Param_Get##name_(size_t* out_array_length);                  \
     esp_err_t Param_Copy##name_(type_* buffer, size_t buffer_size);           \
-    esp_err_t Param_Reset##name_(void);
+    esp_err_t Param_Reset##name_(void);                                       \
+    int Param_Print##name_(char* buf, size_t buf_size);
 #include "param_table.inc"
 #undef PARAM
 #undef ARRAY
