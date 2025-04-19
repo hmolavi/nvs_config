@@ -1,6 +1,6 @@
 version: "0.0.1"
 description: Component for managing NVS parameters defined by the user via param_table.inc.
-url: <your_repository_url>
+url: https://github.com/hmolavi/nvs_config.git
 dependencies:
   idf: ">=4.4"
   nvs_flash: "*" 
