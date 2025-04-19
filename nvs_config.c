@@ -338,8 +338,6 @@ esp_err_t NvsConfig_Init(void)
         nvs_close(handle);
     }
 
-    NvsConfig_SaveDirtyParameters();
-
     // Periodic save timer
     TimerHandle_t xTimer = xTimerCreate(
         "g_param_save",
