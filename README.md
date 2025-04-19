@@ -1,4 +1,4 @@
-[![Component Registry](https://components.espressif.com/components/hmolavi/nvs_config/badge.svg)](https://components.espressif.com/components/hmolavi/nvs_config) [![Espressif](https://img.shields.io/badge/Espressif-Components-blue.svg?style=flat-square)](https://components.espressif.com/components/hmolavi/hamming74) [![GitHub](https://img.shields.io/badge/GitHub-hmolavi/nvs_config-blue.svg?style=flat-square)](https://github.com/hmolavi/nvs_config)
+[![Component Registry](https://components.espressif.com/components/hmolavi/nvs_config/badge.svg)](https://components.espressif.com/components/hmolavi/nvs_config) [![Espressif](https://img.shields.io/badge/Espressif-Components-blue.svg?style=flat-square)](https://components.espressif.com/components/hmolavi/nvs_config) [![GitHub](https://img.shields.io/badge/GitHub-hmolavi/nvs_config-blue.svg?style=flat-square)](https://github.com/hmolavi/nvs_config)
 
 # NVS Config Library
 
