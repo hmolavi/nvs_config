@@ -269,14 +269,17 @@ void NvsConfig_SaveDirtyParameters(void)
 
     // Commit changes if any parameters were successfully saved
     if (parametersChanged > 0) {
-        ESP_LOGI(TAG, "%d dirty parameters committing to flash...", parametersChanged);
+        char buf[128];
+        int len = snprintf(buf, sizeof(buf), "%d dirty parameters committing to flash...", parametersChanged);
         err = nvs_commit(handle);
         if (err != ESP_OK) {
-            ESP_LOGE(TAG, "NVS commit failed! (Error: 0x%x %s)", err, esp_err_to_name(err));
-            // Note: If commit fails, parameters might still be marked as not dirty in memory, but won't be saved persistently
+            len += snprintf(buf + len, sizeof(buf) - len, " Failed");
+            ESP_LOGE(TAG, "%s (Error: 0x%x %s)", buf, err, esp_err_to_name(err));
+            ESP_LOGE(TAG, "NVS commit failed!");
         }
         else {
-            ESP_LOGI(TAG, "NVS commit Done");
+            len += snprintf(buf + len, sizeof(buf) - len, " Done");
+            ESP_LOGI(TAG, "%s", buf);
         }
     }
     nvs_close(handle);
