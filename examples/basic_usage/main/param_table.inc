@@ -14,11 +14,11 @@
 
 // Define security levels
 SECURE_LEVEL(0, "Full access")
-SECURE_LEVEL(2, "User level")
 
 // Define parameters
-PARAM(2, uint8_t, ExampleCounter, 0, "A simple counter for the example")
-ARRAY(2, char, 16, ExampleString, "Hello", "A test string for the example")
+// @warning The name is used as hashkey for nvs_blob so your parameter name cannot exceed 15 characters.
+//          For reference this is a 15 character name "someverylongvar"
+PARAM(0, uint8_t, ExampleCounter, 0, "A simple counter for the example")
 
 #undef PARAM
 #undef ARRAY
