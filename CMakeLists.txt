@@ -13,4 +13,6 @@ idf_component_register(
                 ${main_comp_dir} 
             REQUIRES
                 nvs_flash
+            PRIV_REQUIRES
+                esp_timer
            )
