@@ -49,12 +49,9 @@ The **NVS Storage Config Library** is an ESP-IDF component designed to simplify 
    #define ARRAY(secure_level, type, size, name, default, description)
    #endif
 
-   SECURE_LEVEL(0, "Full access")
-   SECURE_LEVEL(1, "User level")
+   SECURE_LEVEL(0, "Secure Level 0")
 
-   PARAM(1, char, Letter, 'A', "example char")
-   ARRAY(1, char, 32, Sentence, "example char array", "example char array")
-   ARRAY(1, uint8_t, 5, Numbers, ARRAY_INIT(1, 2, 3, 4, 5), "example uint8_t array")
+   PARAM(0, char, Letter, 'A', "example char")
    /* Add other parameters... */
 
    #undef PARAM
@@ -65,20 +62,27 @@ The **NVS Storage Config Library** is an ESP-IDF component designed to simplify 
 3. **Initialize in User Code:**  
    Call `NvsConfig_Init()` at startup to load and manage parameters.
 
-4. **Use your parameters:**
+4. **Accessing Your Parameters:**
+   To interact with your parameters, simply prefix the action (Get, Set, Reset, Print) with `Param_` followed by the name of the parameter as defined in your "param_table.inc" file. This naming convention automatically provides you with the corresponding function for that parameter.
 
    ```c
-   Param_SetLetter('A');
+   char letter;
+   char buf[128];
+   int buffer_write;
+   esp_err_t rc;
 
-   size_t s_count;
-   const char* s = Param_GetSentence(&s_count);
-
-   printf("Sentence: %s\n", s);
-   printf("Length of: %d", s_count)
-
-   uint8_t new_nums[] = {5, 4, 3, 2, 1};
-   size_t new_nums_count = 5;
-   esp_err_t err = Param_SetNumbers(new_nums, new_nums_count);
+   // Get
+   letter = Param_GetLetter();
+   
+   // Set
+   rc = Param_SetLetter('A');
+   
+   // Reset (back to A)
+   rc = Param_ResetLetter();
+   
+   // Print
+   buffer_write = Param_PrintLetter(buf, sizeof(buf));
+   printf("Our letter is: %s", buf);
    ```
 
 ## Example
