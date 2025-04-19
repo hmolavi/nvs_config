@@ -1,0 +1,117 @@
+[![Component Registry](https://components.espressif.com/components/hmolavi/nvs_config/badge.svg)](https://components.espressif.com/components/hmolavi/nvs_config) [![Espressif](https://img.shields.io/badge/Espressif-Components-blue.svg?style=flat-square)](https://components.espressif.com/components/hmolavi/hamming74) [![GitHub](https://img.shields.io/badge/GitHub-hmolavi/nvs_config-blue.svg?style=flat-square)](https://github.com/hmolavi/nvs_config)
+
+# NVS Config Library
+
+The **NVS Storage Config Library** is an ESP-IDF component designed to simplify the creation, management, and persistence of application parameters using Non-Volatile Storage (NVS). It supports both scalar values and array parameters, provides automatic verification against default values, and enables periodic saving of modified parameters using a FreeRTOS timer.
+
+## Features
+
+- **Easy Parameter Declaration:** Use the `PARAM` and `ARRAY` macros (via an external parameter table file) to define parameters and their default values.
+- **Secure Parameter Management:** Configure security levels to protect sensitive parameters.
+- **Automatic Persistence:** Modified parameters are marked as “dirty” and are safely saved to flash.
+- **Runtime Updates:** Change security levels and update parameters at runtime without needing to rebuild the firmware.
+- **Cross-Platform Compatibility:** Built with ESP-IDF for seamless integration in ESP32-based projects.
+
+## How It Works
+
+1. **Initialization:**  
+   The `NvsConfig_Init()` function initializes NVS flash storage, loads parameter values from flash (or sets defaults if not present), and creates a periodic timer to check and save modified parameters.
+2. **Setting and Getting Parameters:**  
+   Each parameter has generated API functions, such as `Param_Set<name>`, `Param_Get<name>`, and `Param_Reset<name>`, to manage its value.
+3. **Security Levels:**  
+   Access to parameters is controlled via security levels. Use `NvsConfig_SecureLevel()` and `NvsConfig_SecureLevelChange()` to check and update the current security level.
+
+## Getting Started
+
+1. **Add the Component:**  
+   Include the component in your ESP-IDF project by referencing it in your project's `CMakeLists.txt` and adding it as a dependency:
+
+   ```bash
+   idf.py add-dependency "hmolavi/nvs-config"
+   ```
+
+2. **Define Your NVS Parameters:**  
+   Create an `param_table.inc` file in your project's `main` directory. Use either the provided example inc file or one here:
+
+   ```c
+   /* param_table.inc */
+   #define ARRAY_INIT(...) {__VA_ARGS__}
+
+   #ifndef SECURE_LEVEL
+   #define SECURE_LEVEL(secure_level, description)
+   #endif
+
+   #ifndef PARAM
+   #define PARAM(secure_level, type, name, default, description)
+   #endif
+
+   #ifndef ARRAY
+   #define ARRAY(secure_level, type, size, name, default, description)
+   #endif
+
+   SECURE_LEVEL(0, "Full access")
+   SECURE_LEVEL(1, "User level")
+
+   PARAM(1, char, Letter, 'A', "example char")
+   ARRAY(1, char, 32, Sentence, "example char array", "example char array")
+   ARRAY(1, uint8_t, 5, Numbers, ARRAY_INIT(1, 2, 3, 4, 5), "example uint8_t array")
+   /* Add other parameters... */
+
+   #undef PARAM
+   #undef ARRAY
+   #undef SECURE_LEVEL
+   ```
+
+3. **Initialize in User Code:**  
+   Call `NvsConfig_Init()` at startup to load and manage parameters.
+
+4. **Use your parameters:**
+
+   ```c
+   Param_SetLetter('A');
+
+   size_t s_count;
+   const char* s = Param_GetSentence(&s_count);
+
+   printf("Sentence: %s\n", s);
+   printf("Length of: %d", s_count)
+
+   uint8_t new_nums[] = {5, 4, 3, 2, 1};
+   size_t new_nums_count = 5;
+   esp_err_t err = Param_SetNumbers(new_nums, new_nums_count);
+   ```
+
+## Example
+
+```c
+#include "nvs_config.h"
+
+void app_main(void) {
+    // Initialize the NVS configuration system.
+    if (NvsConfig_Init() != ESP_OK) {
+        printf("NvsConfig Failed\n");
+    }
+
+    // Set or get specific parameters using generated functions.
+    Param_SetLetter('A');  // Change example char parameter
+    char value = Param_GetLetter();
+
+    // Change security level if needed.
+    NvsConfig_SecureLevelChange(0);
+}
+```
+
+## Build & Integration
+
+- **idf_component.yml**  
+  Ensure the component’s version and dependencies are correctly specified.
+- **CMakeLists.txt**  
+  The component is registered with ESP-IDF using `idf_component_register`.
+
+## License
+
+This project is released under the [MIT License](LICENSE).
+
+## Support
+
+For support and contributions, please visit the [GitHub repository](https://github.com/hmolavi/nvs_config).
