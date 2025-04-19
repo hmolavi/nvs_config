@@ -1,5 +1,10 @@
-version: "0.0.7"
+version: "0.0.8"
 description: nvs-config makes creation and handling of NVS parameters effortless.
-url: https://github.com/hmolavi/nvs_config.git
+
+url: https://github.com/hmolavi/nvs_config
+issues: https://github.com/hmolavi/nvs_config/issues
+documentation: https://github.com/hmolavi/nvs_config/blob/main/README.md
+repository: https://github.com/hmolavi/nvs_config.git
+
 dependencies:
   idf: ">=4.4"
