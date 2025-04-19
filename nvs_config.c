@@ -290,10 +290,18 @@ void NvsConfig_SaveDirtyParameters(void)
     nvs_close(handle);
 }
 
+#if defined(ESP_IDF_VERSION_MAJOR) && (ESP_IDF_VERSION_MAJOR >= 5)
+static void save_dirty_parameters_callback(void *arg)
+{
+    (void) arg;
+    NvsConfig_SaveDirtyParameters();
+}
+#else 
 static void save_dirty_parameters_callback(TimerHandle_t xTimer)
 {
     NvsConfig_SaveDirtyParameters();
 }
+#endif // defined(ESP_IDF_VERSION_MAJOR) && (ESP_IDF_VERSION_MAJOR >= 5)
 
 esp_err_t NvsConfig_Init(void)
 {
