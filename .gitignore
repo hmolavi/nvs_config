@@ -1,7 +1,14 @@
 build/
 dist/
 vscode/
+**/.cache
+
+# ESP-IDF build artifacts
+**/build/
+**/managed_components/
 **/dependencies.lock
 **/sdkconfig
 **/sdkconfig.old
-**/.cache
+*.bin
+*.elf
+*.map
