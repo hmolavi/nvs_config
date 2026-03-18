@@ -7,6 +7,7 @@
  * @copyright Copyright (c) 2025
  */
 
+#include <stdatomic.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -33,7 +34,7 @@ const char *level_meanings[] = {
 #include "param_table.inc"
 };
 
-static uint8_t CurrentSecureLevel = STARTING_LEVEL - 1;
+static _Atomic uint8_t CurrentSecureLevel = STARTING_LEVEL - 1;
 
 uint8_t NvsConfig_SecureLevel(void) { return CurrentSecureLevel; }
 
