@@ -4,7 +4,7 @@
 
 An ESP-IDF component that simplifies the creation, management, and persistence of application parameters using Non-Volatile Storage (NVS). Define your parameters once in a declarative table and the library generates type-safe getters, setters, reset, and print functions at compile time via C macro expansion.
 
-![block_diagram](/assets/nvs_config_block_digram.png)
+![block_diagram](/assets/nvs_config_block_diagram.png)
 
 ## Features
 
