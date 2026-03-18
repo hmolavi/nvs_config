@@ -1,0 +1,9 @@
+menu "NVS Config"
+    config NVS_CONFIG_CONSOLE_ENABLED
+        bool "Enable interactive console commands"
+        default n
+        help
+            Registers ESP-IDF console commands for inspecting and modifying
+            NVS configuration parameters over UART. Adds commands:
+            param list, param get, param set, param reset, param save, param level.
+endmenu

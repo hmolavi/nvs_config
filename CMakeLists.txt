@@ -3,10 +3,21 @@
 idf_build_get_property(project_dir PROJECT_DIR)
 set(main_comp_dir ${project_dir}/main)
 
+set(NVS_CONFIG_SRCS
+    src/nvs_config.c
+    src/secure_level.c)
+
+set(NVS_CONFIG_PRIV_REQUIRES
+    esp_timer)
+
+if(CONFIG_NVS_CONFIG_CONSOLE_ENABLED)
+    list(APPEND NVS_CONFIG_SRCS src/nvs_config_console.c)
+    list(APPEND NVS_CONFIG_PRIV_REQUIRES console)
+endif()
+
 idf_component_register(
             SRCS
-                src/nvs_config.c
-                src/secure_level.c
+                ${NVS_CONFIG_SRCS}
             INCLUDE_DIRS
                 include
             PRIV_INCLUDE_DIRS
@@ -15,5 +26,5 @@ idf_component_register(
             REQUIRES
                 nvs_flash
             PRIV_REQUIRES
-                esp_timer
+                ${NVS_CONFIG_PRIV_REQUIRES}
            )

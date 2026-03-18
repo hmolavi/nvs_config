@@ -122,6 +122,153 @@ typedef struct ParamMasterControl_s {
  */
 extern NvsConfigMasterController_t g_nvsconfig_controller;
 
+/**
+ * @brief Parameter registry entry with function pointers for runtime introspection.
+ *
+ * Each parameter in param_table.inc gets one entry in the global registry array.
+ * This enables generic iteration, lookup-by-name, and polymorphic operations
+ * without knowing the parameter's concrete type at the call site.
+ */
+typedef struct {
+    const char* name;
+    const char* description;
+    uint8_t secure_level;
+    bool is_array;
+    size_t element_size;    /**< sizeof(type) for one element */
+    size_t element_count;   /**< 1 for scalars, array size for arrays */
+    bool (*is_dirty)(void);
+    bool (*is_default)(void);
+    esp_err_t (*reset)(void);
+    int (*print)(char* buf, size_t buf_size);
+    /**
+     * @brief Set a parameter value from a raw pointer.
+     *
+     * For scalars: data points to a single value of the parameter's type,
+     *              data_size must equal element_size.
+     * For arrays:  data points to an array of elements. If data_size < full
+     *              array size, remaining elements are zeroed and ESP_ERR_INVALID_SIZE
+     *              is returned as a warning (the write still occurs).
+     *              If data_size > full array size, ESP_ERR_INVALID_SIZE is returned
+     *              and no write occurs.
+     *
+     * @param data      Pointer to the value(s) to write.
+     * @param data_size Total size in bytes of the data pointed to.
+     * @return ESP_OK on success, ESP_ERR_INVALID_SIZE on partial write (warning)
+     *         or oversize, ESP_ERR_INVALID_STATE if security level insufficient.
+     */
+    esp_err_t (*set)(const void* data, size_t data_size);
+} NvsConfigParamEntry_t;
+
+/** Array of registry entries, one per parameter (order matches param_table.inc). */
+extern const NvsConfigParamEntry_t g_nvsconfig_params[];
+
+/** Number of entries in g_nvsconfig_params. */
+extern const size_t g_nvsconfig_param_count;
+
+/**
+ * @brief Find a parameter registry entry by name.
+ * @param name The parameter name (case-sensitive).
+ * @return Pointer to the entry, or NULL if not found.
+ */
+const NvsConfigParamEntry_t* NvsConfig_FindParam(const char* name);
+
+/**
+ * @brief Reset all parameters to their default values.
+ */
+void NvsConfig_ResetAll(void);
+
+/**
+ * @brief Print all parameters (name = value) to the log.
+ */
+void NvsConfig_PrintAll(void);
+
+/**
+ * @brief Callback type for parameter change notifications.
+ * @param param_name Name of the changed parameter.
+ * @param user_data User-supplied context pointer.
+ */
+typedef void (*NvsConfigOnChange_t)(const char* param_name, void* user_data);
+
+/**
+ * @brief Register a callback that fires when a specific parameter changes.
+ * @param param_name Parameter name to watch (case-sensitive).
+ * @param cb Callback function.
+ * @param user_data Passed to callback on invocation.
+ * @return ESP_OK on success, ESP_ERR_NO_MEM if callback slots full.
+ */
+esp_err_t NvsConfig_RegisterOnChange(const char* param_name,
+                                     NvsConfigOnChange_t cb,
+                                     void* user_data);
+
+/**
+ * @brief Register a callback that fires when any parameter changes.
+ * @param cb Callback function.
+ * @param user_data Passed to callback on invocation.
+ * @return ESP_OK on success, ESP_ERR_NO_MEM if callback slots full.
+ */
+esp_err_t NvsConfig_RegisterGlobalOnChange(NvsConfigOnChange_t cb,
+                                           void* user_data);
+
+/**
+ * @brief Remove all registered callbacks (useful for testing).
+ */
+void NvsConfig_ClearCallbacks(void);
+
+/**
+ * @brief Get the number of successful writes to a parameter since init.
+ * @param name Parameter name (case-sensitive).
+ * @return Write count, or 0 if parameter not found.
+ */
+uint32_t NvsConfig_GetWriteCount(const char* name);
+
+/**
+ * @brief Get the total number of successful writes across all parameters.
+ * @return Sum of all per-parameter write counts.
+ */
+uint32_t NvsConfig_GetTotalWriteCount(void);
+
+/**
+ * @brief Reset all write counters to zero (useful for testing).
+ */
+void NvsConfig_ResetWriteCounts(void);
+
+/**
+ * @brief Schema version for detecting param_table changes across firmware updates.
+ *
+ * Users should define NVS_CONFIG_SCHEMA_VERSION before including this header,
+ * or it defaults to 1. Increment when adding/removing/changing parameters.
+ */
+#ifndef NVS_CONFIG_SCHEMA_VERSION
+#define NVS_CONFIG_SCHEMA_VERSION 1
+#endif
+
+/**
+ * @brief Migration callback type for schema version changes.
+ * @param old_version Version found in NVS flash.
+ * @param new_version Current compiled-in version.
+ * @return ESP_OK if migration succeeded and params should be loaded normally.
+ *         Any error causes a full reset to defaults.
+ */
+typedef esp_err_t (*NvsConfigMigrationCb_t)(uint32_t old_version, uint32_t new_version);
+
+/**
+ * @brief Register a migration callback.
+ *
+ * Must be called BEFORE NvsConfig_Init(). When a version mismatch is
+ * detected, the callback is invoked. If no callback is registered,
+ * all parameters are reset to defaults on version mismatch.
+ *
+ * @param cb Migration callback.
+ * @return ESP_OK on success.
+ */
+esp_err_t NvsConfig_RegisterMigration(NvsConfigMigrationCb_t cb);
+
+/**
+ * @brief Get the current schema version stored in NVS.
+ * @return The schema version.
+ */
+uint32_t NvsConfig_GetSchemaVersion(void);
+
 /*
  * Use macros to generate function declarations for configuration parameters.
  *
