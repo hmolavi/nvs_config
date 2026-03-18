@@ -2,3 +2,4 @@ build/
 dist/
 **/dependencies.lock
 **/sdkconfig
+**/sdkconfig.old

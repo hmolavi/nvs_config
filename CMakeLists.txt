@@ -5,12 +5,13 @@ set(main_comp_dir ${project_dir}/main)
 
 idf_component_register(
             SRCS
-                nvs_config.c
-                secure_level.c
+                src/nvs_config.c
+                src/secure_level.c
             INCLUDE_DIRS
-                .
-            PRIV_INCLUDE_DIRS 
-                ${main_comp_dir} 
+                include
+            PRIV_INCLUDE_DIRS
+                src
+                ${main_comp_dir}
             REQUIRES
                 nvs_flash
             PRIV_REQUIRES
