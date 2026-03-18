@@ -4,6 +4,8 @@
 
 The **NVS Storage Config Library** is an ESP-IDF component designed to simplify the creation, management, and persistence of application parameters using Non-Volatile Storage (NVS). It supports both scalar values and array parameters, provides automatic verification against default values, and enables periodic saving of modified parameters using a FreeRTOS timer.
 
+![block_diagram](/assets/nvs_config_block_digram.png)
+
 ## Features
 
 - **Easy Parameter Declaration:** Use the `PARAM` and `ARRAY` macros (via an external parameter table file) to define parameters and their default values.
