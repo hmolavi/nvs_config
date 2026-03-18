@@ -35,6 +35,10 @@
 
 #include "esp_err.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Initializes the NVS configuration.
  *
@@ -146,5 +150,9 @@ extern NvsConfigMasterController_t g_nvsconfig_controller;
 #include "param_table.inc"
 #undef PARAM
 #undef ARRAY
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // __NVS_CONFIG_H__
