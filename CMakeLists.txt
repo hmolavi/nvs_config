@@ -7,12 +7,8 @@ set(NVS_CONFIG_SRCS
     src/nvs_config.c
     src/secure_level.c)
 
-set(NVS_CONFIG_PRIV_REQUIRES
-    esp_timer)
-
 if(CONFIG_NVS_CONFIG_CONSOLE_ENABLED)
     list(APPEND NVS_CONFIG_SRCS src/nvs_config_console.c)
-    list(APPEND NVS_CONFIG_PRIV_REQUIRES console)
 endif()
 
 idf_component_register(
@@ -26,5 +22,6 @@ idf_component_register(
             REQUIRES
                 nvs_flash
             PRIV_REQUIRES
-                ${NVS_CONFIG_PRIV_REQUIRES}
+                esp_timer
+                console
            )
