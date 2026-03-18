@@ -1,0 +1,17 @@
+# ESP-IDF build artifacts and local configuration
+
+# Build output directory
+/build/
+
+# configuration files
+/sdkconfig
+/sdkconfig.old
+
+# Compiled binary files
+*.bin
+*.elf
+*.map
+
+# Dependency lock file annd IDF Component Manager
+/managed_components/
+/dependencies.lock
