@@ -5,8 +5,6 @@
 
 #include "test_helpers.hpp"
 
-void register_versioning_tests() {} // linker anchor
-
 // ── Tests ──
 
 TEST_F(NvsTestFixture, SchemaVersionReturnsCurrentVersion) {

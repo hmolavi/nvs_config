@@ -6,8 +6,6 @@
 #include "test_helpers.hpp"
 #include <cstring>
 
-void register_callback_tests() {} // linker anchor
-
 // ── Test state ──
 
 static int s_global_cb_count = 0;
@@ -35,18 +33,20 @@ static void second_callback(const char* name, void* user_data) {
     s_second_cb_count++;
 }
 
-// ── Fixture that resets callback state ──
+// ── Fixture ──
 
-struct CallbackFixture : NvsTestFixture {
-    void SetUp() {
-        NvsTestFixture::SetUp();
+TEST_GROUP(CallbackFixture)
+{
+    void setup() {
+        nvs_reset_all_params();
         NvsConfig_ClearCallbacks();
-        s_global_cb_count = 0;
-        s_per_param_count = 0;
-        s_second_cb_count = 0;
-        s_last_cb_name = nullptr;
-        s_last_cb_userdata = nullptr;
+        s_global_cb_count    = 0;
+        s_per_param_count    = 0;
+        s_second_cb_count    = 0;
+        s_last_cb_name       = nullptr;
+        s_last_cb_userdata   = nullptr;
     }
+    void teardown() {}
 };
 
 // ── Tests ──

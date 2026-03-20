@@ -4,8 +4,6 @@
  */
 
 #include "test_helpers.hpp"
-
-void register_print_tests() {} // linker anchor
 #include <cstring>
 
 // ── Scalar print tests ──

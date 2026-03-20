@@ -8,8 +8,6 @@
 
 #include "test_helpers.hpp"
 
-void register_security_tests() {} // linker anchor
-
 // ── Level 0 (Admin): full access ──
 
 TEST_F(NvsTestFixture, Level0CanSetLevel0Scalar) {
@@ -37,11 +35,10 @@ TEST_F(NvsTestFixture, Level0CanSetLevel2Array) {
 
 // ── Level 1 (Operator): level 0 denied ──
 
-struct SecurityLevel1Fixture : NvsTestFixture {
-    void SetUp() {
-        NvsTestFixture::SetUp();
-        NvsConfig_SecureLevelChange(1);
-    }
+TEST_GROUP(SecurityLevel1Fixture)
+{
+    void setup()    { nvs_reset_all_params(); NvsConfig_SecureLevelChange(1); }
+    void teardown() {}
 };
 
 TEST_F(SecurityLevel1Fixture, Level1DeniesLevel0Scalar) {
@@ -68,11 +65,10 @@ TEST_F(SecurityLevel1Fixture, Level1AllowsLevel1Array) {
 
 // ── Level 2 (User): levels 0+1 denied ──
 
-struct SecurityLevel2Fixture : NvsTestFixture {
-    void SetUp() {
-        NvsTestFixture::SetUp();
-        NvsConfig_SecureLevelChange(2);
-    }
+TEST_GROUP(SecurityLevel2Fixture)
+{
+    void setup()    { nvs_reset_all_params(); NvsConfig_SecureLevelChange(2); }
+    void teardown() {}
 };
 
 TEST_F(SecurityLevel2Fixture, Level2DeniesLevel0) {

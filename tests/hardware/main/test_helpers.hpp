@@ -1,6 +1,6 @@
 /**
  * @file test_helpers.hpp
- * @brief Shared fixture and utilities for nvs_config unit tests.
+ * @brief Shared fixture and utilities for nvs_config hardware tests.
  */
 
 #pragma once

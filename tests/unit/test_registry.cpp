@@ -6,8 +6,6 @@
 #include "test_helpers.hpp"
 #include <cstring>
 
-void register_registry_tests() {} // linker anchor
-
 // ── Registry metadata ──
 
 TEST_F(NvsTestFixture, RegistryCountMatchesExpected) {

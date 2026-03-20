@@ -4,8 +4,6 @@
  */
 
 #include "test_helpers.hpp"
-
-void register_array_tests() {} // linker anchor
 #include <cstring>
 
 // ── char[16] (DeviceName) ──

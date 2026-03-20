@@ -104,7 +104,7 @@ private:
     int total_assertions_ = 0;
 };
 
-// Auto-registration helper — constructor adds test to runner at static init time
+// Auto-registration helper - constructor adds test to runner at static init time
 struct Registrar {
     Registrar(const char* suite, const char* name, std::function<void()> body) {
         TestRunner::get().add(suite, name, std::move(body));

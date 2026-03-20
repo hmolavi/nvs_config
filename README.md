@@ -108,7 +108,7 @@ Each example is a complete buildable ESP-IDF project. See the README in each fol
 
 | Example                                          | Description                                                            |
 | ------------------------------------------------ | ---------------------------------------------------------------------- |
-| [basic_usage](examples/basic_usage/)             | Simplest use — a single counter that persists across reboots           |
+| [basic_usage](examples/basic_usage/)             | A single counter that persists across reboots                          |
 | [array_example](examples/array_example/)         | Array parameter get, set, copy, and reset                              |
 | [console_demo](examples/console_demo/)           | Interactive UART shell for parameter management                        |
 | [registry_iterator](examples/registry_iterator/) | Generic iteration and type-agnostic operations via the registry vtable |
@@ -142,13 +142,33 @@ See [API.md](API.md) for the full API reference, including all function signatur
 
 ## Testing
 
-The `test/` directory contains a C++ unit test suite (100+ tests) covering all features:
+Tests are in the `tests/` folder:
+
+- `tests/unit/`: 163 host-based unit tests (fast, no board needed)
+- `tests/hardware/`: 4 on-device tests (real FreeRTOS concurrency)
+
+The unit tests use CppUTest with gcov/lcov coverage.
+
+Current unit test code coverage:  
+![code_coverage](/assets/2026_3_20_code_coverage.png)
+
+To run the unit tests:
 
 ```bash
-cd test
+# From the project directory:
+tests/unit/run_unit_tests.sh
+```
+
+To run the hardware tests:
+
+```bash
+# From the project directory & from ESP-IDF terminal:
+cd tests/hardware/
 idf.py set-target <your-esp32-model>
 idf.py build flash monitor
 ```
+
+For more details, see [tests/README.md](tests/README.md).
 
 ## Compatibility
 

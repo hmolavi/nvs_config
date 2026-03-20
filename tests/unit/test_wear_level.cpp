@@ -5,15 +5,15 @@
 
 #include "test_helpers.hpp"
 
-void register_wear_level_tests() {} // linker anchor
+// ── Fixture ──
 
-// ── Fixture that resets write counts ──
-
-struct WearLevelFixture : NvsTestFixture {
-    void SetUp() {
-        NvsTestFixture::SetUp();
+TEST_GROUP(WearLevelFixture)
+{
+    void setup() {
+        nvs_reset_all_params();
         NvsConfig_ResetWriteCounts();
     }
+    void teardown() {}
 };
 
 // ── Tests ──

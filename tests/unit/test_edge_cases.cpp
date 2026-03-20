@@ -4,8 +4,6 @@
  */
 
 #include "test_helpers.hpp"
-
-void register_edge_case_tests() {} // linker anchor
 #include <cstring>
 
 // ── Boundary values ──

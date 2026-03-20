@@ -7,25 +7,51 @@ on:
     branches: [main]
 
 jobs:
-  build-test:
-    name: Test (${{ matrix.target }})
+
+  # ── Unit tests (host, no hardware required) ──────────────────────────────
+  unit-tests:
+    name: Unit Tests (CppUTest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq cmake cpputest lcov
+
+      - name: Build
+        run: cmake -B tests/unit/build tests/unit && cmake --build tests/unit/build
+
+      - name: Run tests
+        run: ./tests/unit/build/unit_tests -ojunit
+
+      - name: Upload JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: "*.xml"
+
+  # ── Hardware test build check (ESP-IDF, no flash) ────────────────────────
+  build-hardware-tests:
+    name: Hardware Tests Build (${{ matrix.target }})
     runs-on: ubuntu-latest
     container:
       image: espressif/idf:v5.4
     strategy:
       fail-fast: false
       matrix:
-        target: [esp32, esp32s3]
+        target: [esp32s3]
     steps:
       - uses: actions/checkout@v4
-      - name: Build test project
+      - name: Build
         shell: bash
         run: |
           . $IDF_PATH/export.sh
-          cd test
+          cd tests/hardware
           idf.py set-target ${{ matrix.target }}
           idf.py build
 
+  # ── Example builds ───────────────────────────────────────────────────────
   build-examples:
     name: Example ${{ matrix.example }} (${{ matrix.target }})
     runs-on: ubuntu-latest
@@ -38,55 +64,10 @@ jobs:
         target: [esp32, esp32s3]
     steps:
       - uses: actions/checkout@v4
-      - name: Build example
+      - name: Build
         shell: bash
         run: |
           . $IDF_PATH/export.sh
           cd examples/${{ matrix.example }}
           idf.py set-target ${{ matrix.target }}
           idf.py build
-
-  qemu-test:
-    name: QEMU test (esp32)
-    runs-on: ubuntu-latest
-    container:
-      image: espressif/idf:v5.4
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install QEMU
-        run: |
-          apt-get update -qq && apt-get install -y -qq qemu-system-xtensa >/dev/null 2>&1 || true
-      - name: Build for QEMU
-        shell: bash
-        run: |
-          . $IDF_PATH/export.sh
-          cd test
-          idf.py set-target esp32
-          idf.py build
-      - name: Run on QEMU
-        shell: bash
-        run: |
-          cd test
-          if command -v qemu-system-xtensa &> /dev/null; then
-            # Merge flash binary for QEMU
-            . $IDF_PATH/export.sh
-            esptool.py --chip esp32 merge_bin -o build/merged.bin \
-              --flash_mode dio --flash_size 4MB \
-              0x1000 build/bootloader/bootloader.bin \
-              0x8000 build/partition_table/partition-table.bin \
-              0x10000 build/nvs_config_test.bin
-
-            timeout 60 qemu-system-xtensa \
-              -nographic -machine esp32 \
-              -drive file=build/merged.bin,if=mtd,format=raw \
-              2>&1 | tee qemu_output.txt || true
-
-            if grep -q "ALL TESTS PASSED" qemu_output.txt; then
-              echo "QEMU tests passed!"
-            else
-              echo "::warning::QEMU test output did not contain ALL TESTS PASSED"
-              cat qemu_output.txt
-            fi
-          else
-            echo "::warning::qemu-system-xtensa not available, skipping QEMU test"
-          fi

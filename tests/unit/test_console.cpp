@@ -9,8 +9,6 @@
 #include "test_helpers.hpp"
 #include <cstring>
 
-void register_console_tests() {} // linker anchor
-
 // ── set() round-trips for each scalar type ──
 
 TEST_F(NvsTestFixture, SetVoidPtrChar) {

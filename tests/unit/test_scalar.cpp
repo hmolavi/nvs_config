@@ -5,8 +5,6 @@
 
 #include "test_helpers.hpp"
 
-void register_scalar_tests() {} // linker anchor
-
 // ── char ──
 
 TEST_F(NvsTestFixture, CharDefault) {
