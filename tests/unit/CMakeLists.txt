@@ -4,14 +4,33 @@ project(nvs_config_unit_tests CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD   11)
 
-# ── Locate CppUTest (installed via: brew install cpputest) ──────────────────
-find_package(CppUTest REQUIRED)
+# -- Locate CppUTest ----------------------------------------------------------
+# find_package(CppUTest) is skipped because the Ubuntu apt package ships a
+# broken CppUTestConfig.cmake that references a non-existent path.
+# We locate headers and the library directly instead.
+find_path(CppUTest_INCLUDE_DIRS
+    NAMES CppUTest/TestHarness.h
+    HINTS /usr/include /usr/local/include /opt/homebrew/include
+)
+find_library(CppUTest_LIBRARIES
+    NAMES CppUTest
+    HINTS /usr/lib /usr/local/lib /opt/homebrew/lib
+          /usr/lib/x86_64-linux-gnu /usr/lib/aarch64-linux-gnu
+)
+if(NOT CppUTest_INCLUDE_DIRS OR NOT CppUTest_LIBRARIES)
+    message(FATAL_ERROR
+        "CppUTest not found.\n"
+        "  macOS: brew install cpputest\n"
+        "  Ubuntu: sudo apt-get install cpputest")
+endif()
+message(STATUS "CppUTest headers: ${CppUTest_INCLUDE_DIRS}")
+message(STATUS "CppUTest library: ${CppUTest_LIBRARIES}")
 
-# ── Source paths ────────────────────────────────────────────────────────────
+# -- Source paths ------------------------------------------------------------
 set(NVS_CONFIG_ROOT ${CMAKE_SOURCE_DIR}/../..)
 set(MOCK_DIR        ${CMAKE_SOURCE_DIR}/mocks)
 
-# ── Test executable ─────────────────────────────────────────────────────────
+# -- Test executable ---------------------------------------------------------
 add_executable(unit_tests
     test_main.cpp
     test_groups.cpp
@@ -43,7 +62,7 @@ target_compile_definitions(unit_tests PRIVATE
     ESP_IDF_VERSION_MAJOR=5
 )
 
-# ── Compile flags ───────────────────────────────────────────────────────────
+# -- Compile flags -----------------------------------------------------------
 target_compile_options(unit_tests PRIVATE
     --coverage
     -g
@@ -60,7 +79,7 @@ target_link_libraries(unit_tests
     ${CppUTest_LIBRARIES}
 )
 
-# ── Coverage target ──────────────────────────────────────────────────────────
+# -- Coverage target ----------------------------------------------------------
 # Run: cd build && make coverage
 # Then: open coverage_html/index.html
 add_custom_target(coverage
