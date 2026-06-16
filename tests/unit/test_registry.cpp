@@ -137,6 +137,80 @@ TEST_F(NvsTestFixture, RegistrySetArrayOversize) {
     EXPECT_ERR(e->set(too_big, sizeof(too_big)), ESP_ERR_INVALID_SIZE);
 }
 
+// ── Vtable get() ──
+
+TEST_F(NvsTestFixture, RegistryGetScalarViaVtable) {
+    const NvsConfigParamEntry_t* e = NvsConfig_FindParam("Brightness");
+    EXPECT_TRUE(e != nullptr);
+    Param_SetBrightness(77);
+    uint8_t val = 0;
+    EXPECT_OK(e->get(&val, sizeof(val)));
+    EXPECT_EQ(val, (uint8_t)77);
+}
+
+TEST_F(NvsTestFixture, RegistryGetScalarDefaultValue) {
+    const NvsConfigParamEntry_t* e = NvsConfig_FindParam("Brightness");
+    EXPECT_TRUE(e != nullptr);
+    uint8_t val = 0;
+    EXPECT_OK(e->get(&val, sizeof(val)));
+    EXPECT_EQ(val, (uint8_t)255);  // default
+}
+
+TEST_F(NvsTestFixture, RegistryGetScalarWrongSize) {
+    const NvsConfigParamEntry_t* e = NvsConfig_FindParam("Brightness");
+    EXPECT_TRUE(e != nullptr);
+    uint16_t wrong = 0;
+    EXPECT_ERR(e->get(&wrong, sizeof(wrong)), ESP_ERR_INVALID_SIZE);
+}
+
+TEST_F(NvsTestFixture, RegistryGetMatchesSetViaVtable) {
+    const NvsConfigParamEntry_t* e = NvsConfig_FindParam("Brightness");
+    EXPECT_TRUE(e != nullptr);
+    uint8_t in = 123;
+    EXPECT_OK(e->set(&in, sizeof(in)));
+    uint8_t out = 0;
+    EXPECT_OK(e->get(&out, sizeof(out)));
+    EXPECT_EQ(out, in);
+}
+
+TEST_F(NvsTestFixture, RegistryGetArrayViaVtable) {
+    const NvsConfigParamEntry_t* e = NvsConfig_FindParam("RGBColor");
+    EXPECT_TRUE(e != nullptr);
+    const uint16_t rgb[3] = {10, 20, 30};
+    EXPECT_OK(e->set(rgb, sizeof(rgb)));
+    uint16_t out[3] = {0, 0, 0};
+    EXPECT_OK(e->get(out, sizeof(out)));
+    EXPECT_EQ(out[0], (uint16_t)10);
+    EXPECT_EQ(out[1], (uint16_t)20);
+    EXPECT_EQ(out[2], (uint16_t)30);
+}
+
+TEST_F(NvsTestFixture, RegistryGetArrayOversizeBuffer) {
+    const NvsConfigParamEntry_t* e = NvsConfig_FindParam("RGBColor");
+    EXPECT_TRUE(e != nullptr);
+    const uint16_t rgb[3] = {1, 2, 3};
+    EXPECT_OK(e->set(rgb, sizeof(rgb)));
+    // Buffer larger than the array: full array copied, extra slot untouched.
+    uint16_t out[4] = {0, 0, 0, 0xBEEF};
+    EXPECT_OK(e->get(out, sizeof(out)));
+    EXPECT_EQ(out[0], (uint16_t)1);
+    EXPECT_EQ(out[1], (uint16_t)2);
+    EXPECT_EQ(out[2], (uint16_t)3);
+    EXPECT_EQ(out[3], (uint16_t)0xBEEF);  // untouched
+}
+
+TEST_F(NvsTestFixture, RegistryGetArrayPartialRead) {
+    const NvsConfigParamEntry_t* e = NvsConfig_FindParam("RGBColor");
+    EXPECT_TRUE(e != nullptr);
+    const uint16_t rgb[3] = {111, 222, 333};
+    EXPECT_OK(e->set(rgb, sizeof(rgb)));
+    // Buffer too small for the whole array: copy what fits, warn with INVALID_SIZE.
+    uint16_t out[2] = {0, 0};
+    EXPECT_ERR(e->get(out, sizeof(out)), ESP_ERR_INVALID_SIZE);
+    EXPECT_EQ(out[0], (uint16_t)111);
+    EXPECT_EQ(out[1], (uint16_t)222);
+}
+
 TEST_F(NvsTestFixture, RegistryElementSizeAndCount) {
     const NvsConfigParamEntry_t* scalar = NvsConfig_FindParam("Brightness");
     EXPECT_TRUE(scalar != nullptr);
