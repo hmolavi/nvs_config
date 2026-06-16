@@ -94,7 +94,35 @@ void app_main(void)
         ESP_LOGI(TAG, "RGBColor is now: %s", buf);
     }
 
-    /* --- 4. Check flags --- */
+    /* --- 4. Generic get via void pointer --- */
+    ESP_LOGI(TAG, "");
+    ESP_LOGI(TAG, "--- Generic get() via void* ---");
+
+    // Read a scalar back into a typed buffer without knowing the name at compile time.
+    uint8_t volume_copy = 0;
+    err = vol->get(&volume_copy, sizeof(volume_copy));
+    ESP_LOGI(TAG, "Get Volume: %s -> %u", esp_err_to_name(err), (unsigned)volume_copy);
+
+    // Read an array back into a local buffer.
+    if (rgb) {
+        uint8_t color_copy[3] = {0};
+        err = rgb->get(color_copy, sizeof(color_copy));
+        ESP_LOGI(TAG, "Get RGBColor: %s -> {%u, %u, %u}",
+                 esp_err_to_name(err),
+                 (unsigned)color_copy[0],
+                 (unsigned)color_copy[1],
+                 (unsigned)color_copy[2]);
+
+        // A buffer smaller than the array yields a partial read (ESP_ERR_INVALID_SIZE).
+        uint8_t partial[2] = {0};
+        err = rgb->get(partial, sizeof(partial));
+        ESP_LOGI(TAG, "Get RGBColor (partial 2 of 3): %s -> {%u, %u}",
+                 esp_err_to_name(err),
+                 (unsigned)partial[0],
+                 (unsigned)partial[1]);
+    }
+
+    /* --- 5. Check flags --- */
     ESP_LOGI(TAG, "");
     ESP_LOGI(TAG, "--- Dirty/default flags after changes ---");
     for (size_t i = 0; i < g_nvsconfig_param_count; i++) {
@@ -105,7 +133,7 @@ void app_main(void)
                  p->is_default() ? "yes" : "no");
     }
 
-    /* --- 5. Reset all --- */
+    /* --- 6. Reset all --- */
     ESP_LOGI(TAG, "");
     ESP_LOGI(TAG, "--- ResetAll ---");
     NvsConfig_ResetAll();
