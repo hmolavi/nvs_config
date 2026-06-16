@@ -157,6 +157,27 @@ typedef struct {
      *         or oversize, ESP_ERR_INVALID_STATE if security level insufficient.
      */
     esp_err_t (*set)(const void* data, size_t data_size);
+
+    /**
+     * @brief Copy a parameter value into a caller-supplied buffer.
+     *
+     * For scalars: data must point to a buffer of exactly element_size bytes;
+     *              data_size must equal element_size, otherwise ESP_ERR_INVALID_SIZE
+     *              is returned and nothing is copied.
+     * For arrays:  data points to a destination buffer. If data_size >= the full
+     *              array size, the whole array is copied and ESP_OK is returned
+     *              (extra space in data is left untouched). If data_size < the full
+     *              array size, only data_size bytes are copied (partial read) and
+     *              ESP_ERR_INVALID_SIZE is returned as a warning.
+     *
+     * Reads are not gated by the security level.
+     *
+     * @param data      Pointer to the destination buffer.
+     * @param data_size Total size in bytes of the destination buffer.
+     * @return ESP_OK on success, ESP_ERR_INVALID_SIZE on a scalar size mismatch
+     *         or an array partial read (warning).
+     */
+    esp_err_t (*get)(void* data, size_t data_size);
 } NvsConfigParamEntry_t;
 
 /** Array of registry entries, one per parameter (order matches param_table.inc). */

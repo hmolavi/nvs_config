@@ -390,6 +390,12 @@ uint32_t NvsConfig_GetSchemaVersion(void)
         type_ val;                                                                     \
         memcpy(&val, data, sizeof(type_));                                             \
         return Param_Set##name_(val);                                                  \
+    }                                                                                  \
+    static esp_err_t _registry_get_##name_(void* data, size_t data_size) {             \
+        if (data_size != sizeof(type_)) return ESP_ERR_INVALID_SIZE;                   \
+        type_ val = Param_Get##name_();                                                \
+        memcpy(data, &val, sizeof(type_));                                             \
+        return ESP_OK;                                                                 \
     }
 
 #define ARRAY(secure_lvl_, type_, size_, name_, default_value_, description_)           \
@@ -417,6 +423,17 @@ uint32_t NvsConfig_GetSchemaVersion(void)
         memcpy(tmp, data, data_size);                                                   \
         Param_Set##name_(tmp, size_);                                                   \
         return ESP_ERR_INVALID_SIZE; /* warning: partial write */                       \
+    }                                                                                   \
+    static esp_err_t _registry_get_##name_(void* data, size_t data_size) {              \
+        const size_t full_size = size_ * sizeof(type_);                                 \
+        if (data_size >= full_size) {                                                   \
+            return Param_Copy##name_((type_*)data, data_size);                          \
+        }                                                                               \
+        /* Partial read: copy only what fits into the caller's buffer */                \
+        xSemaphoreTake(s_nvs_mutex, portMAX_DELAY);                                      \
+        memcpy(data, g_nvsconfig_controller.name_.value, data_size);                    \
+        xSemaphoreGive(s_nvs_mutex);                                                     \
+        return ESP_ERR_INVALID_SIZE; /* warning: partial read */                        \
     }
 #include "param_table.inc"
 #undef PARAM
@@ -438,6 +455,7 @@ uint32_t NvsConfig_GetSchemaVersion(void)
         .reset = _registry_reset_##name_,                               \
         .print = _registry_print_##name_,                               \
         .set = _registry_set_##name_,                                   \
+        .get = _registry_get_##name_,                                   \
     },
 #define ARRAY(secure_lvl_, type_, size_, name_, default_value_, description_) \
     {                                                                          \
@@ -452,6 +470,7 @@ uint32_t NvsConfig_GetSchemaVersion(void)
         .reset = _registry_reset_##name_,                                     \
         .print = _registry_print_##name_,                                     \
         .set = _registry_set_##name_,                                         \
+        .get = _registry_get_##name_,                                         \
     },
 const NvsConfigParamEntry_t g_nvsconfig_params[] = {
 #include "param_table.inc"
